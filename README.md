@@ -1,6 +1,6 @@
-# Cinch::Hangouts
+# Cinch::Plugins::Hangouts
 
-TODO: Write a gem description
+Cinch Plugin for tracking Hangout URLs linked in the channel.
 
 ## Installation
 
@@ -18,7 +18,15 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Just add the plugin to your list:
+
+    @bot = Cinch::Bot.new do
+      configure do |c|
+        c.plugins.plugins = [Cinch::Plugins::Hangouts]
+      end
+    end
+
+Then in channel use .hangouts to get notifications of the hangouts that have been linked recently.
 
 ## Contributing
 

@@ -1,7 +1,5 @@
-require "cinch-hangouts/version"
-
-module Cinch
-  module Hangouts
-    # Your code goes here...
-  end
-end
+require 'cinch-storage'
+require 'cinch-toolbox'
+require 'time-lord'
+require 'cinch/plugins/hangouts/version'
+require 'cinch/plugins/hangouts/hangouts'
