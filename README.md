@@ -1,5 +1,11 @@
 # Cinch::Plugins::Hangouts
 
+[![Gem Version](https://badge.fury.io/rb/cinch-hangouts.png)](http://badge.fury.io/rb/cinch-hangouts)
+[![Dependency Status](https://gemnasium.com/bhaberer/cinch-hangouts.png)](https://gemnasium.com/bhaberer/cinch-hangouts)
+[![Build Status](https://travis-ci.org/bhaberer/cinch-hangouts.png?branch=master)](https://travis-ci.org/bhaberer/cinch-hangouts)
+[![Coverage Status](https://coveralls.io/repos/bhaberer/cinch-hangouts/badge.png?branch=master)](https://coveralls.io/r/bhaberer/cinch-hangouts?branch=master)
+[![Code Climate](https://codeclimate.com/github/bhaberer/cinch-hangouts.png)](https://codeclimate.com/github/bhaberer/cinch-hangouts)
+
 Cinch Plugin for tracking Hangout URLs linked in the channel.
 
 ## Installation
