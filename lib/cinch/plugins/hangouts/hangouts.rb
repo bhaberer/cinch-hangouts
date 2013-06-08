@@ -1,4 +1,9 @@
 # -*- coding: utf-8 -*-
+require 'cinch'
+require 'cinch-storage'
+require 'cinch-toolbox'
+require 'time-lord'
+
 module Cinch::Plugins
   class Hangouts
     include Cinch::Plugin
@@ -11,52 +16,59 @@ module Cinch::Plugins
 
     listen_to :channel
 
+    # This is the regex that captures hangout links in the following format:
+    #   https://plus.google.com/hangouts/_/fbae432b70a47bdf7786e53a16f364895c09d9f8
+    #
+    # The regex will need to be updated if the url scheme changes in the future.
+    HANGOUTS_REGEX = /plus.google.com\/hangouts\/_\/([^\/?]{40})/
+
     def initialize(*args)
       super
       @storage = CinchStorage.new(config[:filename] || 'yaml/hangouts.yml')
       @storage.data[:hangouts] ||= {}
       @storage.data[:subscriptions] ||= []
+
       @expire_period = config[:expire_period] || 120
+      @response_type = config[:response_type] || :notice
     end
 
     def listen(m)
-      # This is the regex that captures hangout links in the following format:
-      #
-      #   https://plus.google.com/hangouts/_/fbae432b70a47bdf7786e53a16f364895c09d9f8
-      #
-      # The regex will need to be updated if the url scheme changes in the future.
-      if m.message.match(/plus.google.com\/hangouts\//)
-        hangout_id = m.message[/[^\/?]{40}/, 0]
-        unless hangout_id.nil?
-          if @storage.data[:hangouts].key?(hangout_id)
-            @storage.data[:hangouts][hangout_id][:time] = Time.now
-          else
-            @storage.data[:hangouts][hangout_id] = {:user => m.user.nick, :time => Time.now}
-          end
+      if hangout_id = m.message[HANGOUTS_REGEX, 1]
+        # If it's a new hangout capture the first linker's name
+        @storage.data[:hangouts][hangout_id] ||= { :user => m.user.nick }
 
-          synchronize(:hangout_save) do
-            @storage.save
-          end
+        notify_subscribers(m.user.nick, hangout_id,
+                           @storage.data[:hangouts][hangout_id].key?(:time))
 
-         @storage.data[:subscriptions].each do |user|
-            unless m.user.nick == user
-              Cinch::User.new(user, @bot).notice "#{m.user.nick} just linked a new hangout at #{hangout_url(hangout_id)}!"
-            end
-          end
-        end
+        # Record the current time for purposes of auto expiration
+        @storage.data[:hangouts][hangout_id][:time] = Time.now
+
+        @storage.synced_save(@bot)
       end
     end
 
     private
 
+    def notify_subscribers(nick, hangout_id, new)
+      @storage.data[:subscriptions].each do |sub|
+        unless nick == sub[:nick]
+          Cinch::User.new(user, @bot).
+            notice "#{nick} just linked a new hangout at: #{hangout_url(hangout_id)}"
+        end
+      end
+    end
+
     def list_hangouts(m)
       hangouts = sort_and_expire
+
       if hangouts.empty?
-        m.user.notice "No hangouts have been linked recently!"
+        respond m, "No hangouts have been linked recently!"
       else
-        m.user.notice "These hangouts have been linked in the last #{@expire_period} minutes. They may or may not still be going."
+        respond m, "These hangouts have been linked in the last #{@expire_period} minutes. " +
+                   "They may or may not still be going."
         hangouts.each do |hangout|
-          m.user.notice "#{hangout[:user]} started a hangout #{hangout[:time].ago.to_words} ago at #{hangout_url(hangout[:id])}"
+          respond m, "#{hangout[:user]} started a hangout at #{hangout_url(hangout[:id])} " +
+                     "it was last linked #{hangout[:time].ago.to_words}"
         end
       end
     end
@@ -64,38 +76,49 @@ module Cinch::Plugins
     def subscribe(m)
       nick = m.user.nick
       if @storage.data[:subscriptions].include?(nick)
-        m.user.notice "You are already subscribed, to unsubscribe use `.hangouts unsubscribe`"
+        msg = "You are already subscribed. "
       else
         @storage.data[:subscriptions] << nick
-        synchronize(:hangout_save) do
-          @storage.save
-        end
-        m.user.notice "You are now subscribed, and will receive a message when a *new* hangout is linked. To unsubscribe use `.hangouts unsubscribe`."
+        @storage.synced_save(@bot)
+        msg = "You are now subscribed. I will let you know when a hangout is linked. "
       end
+      respond m, msg + "To unsubscribe use `.hangouts unsubscribe`."
     end
 
     def unsubscribe(m)
       nick = m.user.nick
       if @storage.data[:subscriptions].include?(nick)
         @storage.data[:subscriptions].delete(nick)
-        synchronize(:hangout_save) do
-          @storage.save
-        end
-        m.user.notice "You are now unsubscribed, and will no longer receive a messages. To resubscribe use `.hangouts subscribe`."
+        @storage.synced_save(@bot)
+        msg = "You are now unsubscribed, and will no longer receive a messages. "
       else
-        m.user.notice "You are not subscribed, to subscribe use `.hangouts subscribe`"
+        msg = "You are not subscribed. "
       end
+      respond m, msg + "To subscribe use `.hangouts subscribe`."
     end
 
     def sort_and_expire
+      @storage.data[:hangouts].delete_if { |id, h| (Time.now - h[:time]) > (@expire_period * 60) }
+      @storage.synced_save(@bot)
+
       hangouts = @storage.data[:hangouts].each_pair.map { |x,y| y[:id] = x;y }
-      hangouts.delete_if { |h| Time.now - h[:time] > @expire_period * 60 }
       hangouts.sort! { |x,y| y[:time] <=> x[:time] }
       return hangouts
     end
 
     def hangout_url(id)
       return Cinch::Toolbox.shorten("https://plus.google.com/hangouts/_/#{id}")
+    end
+
+    def respond(m, message)
+      case @response_type
+      when :notice
+        m.user.notice message
+      when :pm
+        m.user.send message
+      else
+        m.reply message
+      end
     end
   end
 end
