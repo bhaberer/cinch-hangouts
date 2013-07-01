@@ -8,6 +8,8 @@ module Cinch::Plugins
   class Hangouts
     include Cinch::Plugin
 
+    attr_accessor :storage
+
     self.help = "Use .hangouts to see the info for any recent hangouts. You can also use .hangouts subscribe to sign up for notifications."
 
     match /hangouts\z/,           method: :list_hangouts
@@ -20,7 +22,7 @@ module Cinch::Plugins
     #   https://plus.google.com/hangouts/_/fbae432b70a47bdf7786e53a16f364895c09d9f8
     #
     # The regex will need to be updated if the url scheme changes in the future.
-    HANGOUTS_REGEX = /plus.google.com\/hangouts\/_\/([^\/?]{40})/
+    HANGOUTS_REGEX = /plus.google.com\/hangouts\/_\/([a-f0-9]{40})/
 
     def initialize(*args)
       super
