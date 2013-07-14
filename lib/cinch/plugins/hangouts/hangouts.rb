@@ -39,8 +39,7 @@ module Cinch::Plugins
         # If it's a new hangout capture the first linker's name
         @storage.data[:hangouts][hangout_id] ||= { :user => m.user.nick }
 
-        notify_subscribers(m.user.nick, hangout_id,
-                           @storage.data[:hangouts][hangout_id].key?(:time))
+        notify_subscribers(hangout_id, @storage.data[:hangouts][hangout_id].key?(:time))
 
         # Record the current time for purposes of auto expiration
         @storage.data[:hangouts][hangout_id][:time] = Time.now
@@ -51,11 +50,12 @@ module Cinch::Plugins
 
     private
 
-    def notify_subscribers(nick, hangout_id, new)
+    def notify_subscribers(hangout_id, new)
+      nick = @storage.data[:hangouts][hangout_id][:user]
       @storage.data[:subscriptions].each do |sub|
-        unless nick == sub[:nick]
-          Cinch::User.new(user, @bot).
-            notice "#{nick} just linked a new hangout at: #{hangout_url(hangout_id)}"
+        unless nick == sub
+          user = Cinch::User.new(sub, @bot)
+          respond(user, "#{nick} just linked a new hangout at: #{hangout_url(hangout_id)}")
         end
       end
     end

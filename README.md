@@ -32,7 +32,7 @@ Just add the plugin to your list:
       end
     end
 
-Then in channel use .hangouts to get notifications of the hangouts that have been linked recently.
+Then in channel use !hangouts to get notifications of the hangouts that have been linked recently.
 
 ## Contributing
 
