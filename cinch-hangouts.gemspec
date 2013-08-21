@@ -23,7 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'cinch-test'
 
   gem.add_dependency 'cinch',         '~> 2.0.5'
-  gem.add_dependency 'cinch-storage', '~> 1.0.0'
+  gem.add_dependency 'cinch-storage', '~> 1.0.3'
   gem.add_dependency 'cinch-toolbox', '~> 1.0.3'
   gem.add_dependency 'time-lord',     '~> 1.0.1'
 end
