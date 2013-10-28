@@ -56,6 +56,16 @@ describe Cinch::Plugins::Hangouts do
       reply.should include "test started a hangout at"
       reply.should match(/it was last linked \d seconds? ago/)
     end
+
+    it 'should capture a new short Hangout link and store it in @storage' do
+      msg = make_message(@bot, Hangout.url('7acpjrpcmgl00u0b665mu25b1g', false), { :channel => '#foo' })
+      get_replies(msg).should be_empty
+      sleep 1 # hack until 'time-lord' fix gets released
+      msg = make_message(@bot, '!hangouts')
+      reply = get_replies(msg).last.text
+      reply.should include "test started a hangout at"
+      reply.should match(/it was last linked \d seconds? ago/)
+    end
   end
 
   describe 'subscriptions' do
@@ -106,10 +116,10 @@ describe Cinch::Plugins::Hangouts do
     end
   end
 
-  def random_hangout_id
+  def random_hangout_id(len = 40)
     chars = %w{ a b c d e f 0 1 2 3 4 5 6 7 8 9 }
     string = ''
-    40.times { string << chars[rand(chars.length)] } 
+    len.times { string << chars[rand(chars.length)] } 
     string
   end
 end

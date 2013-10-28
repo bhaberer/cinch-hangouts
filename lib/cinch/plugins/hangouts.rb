@@ -24,7 +24,7 @@ module Cinch::Plugins
     #   https://plus.google.com/hangouts/_/fbae432b70a47bdf7786e53a16f364895c09d9f8
     #
     # The regex will need to be updated if the url scheme changes in the future.
-    HANGOUTS_REGEX = /plus\.google\.com\/hangouts\/_\/([a-f0-9]{40})/
+    HANGOUTS_REGEX = /plus\.google\.com\/hangouts\/_\/([a-z0-9]{10,40})(\?|$)/
 
     def initialize(*args)
       super
