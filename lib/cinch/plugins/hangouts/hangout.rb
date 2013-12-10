@@ -1,5 +1,7 @@
+# -*- encoding : utf-8 -*-
+# Class to manage Hangout information
 class Hangout < Cinch::Plugins::Hangouts
-  attr_accessor :nick, :id, :time
+  attr_accessor :nick, :id, :time, :hangout_filename
 
   def initialize(nick, id, time)
     @nick = nick
@@ -9,8 +11,8 @@ class Hangout < Cinch::Plugins::Hangouts
 
   def save
     storage = CinchStorage.new(@@hangout_filename)
-    storage.data[:hangouts] ||= Hash.new
-    storage.data[:hangouts][self.id] = self
+    storage.data[:hangouts] ||= {}
+    storage.data[:hangouts][id] = self
     storage.save
   end
 
@@ -33,8 +35,8 @@ class Hangout < Cinch::Plugins::Hangouts
 
   def self.sorted
     hangouts = listing.values
-    hangouts.sort! { |x,y| y.time <=> x.time }
-    return hangouts
+    hangouts.sort! { |x, y| y.time <=> x.time }
+    hangouts
   end
 
   def self.listing
@@ -52,7 +54,7 @@ class Hangout < Cinch::Plugins::Hangouts
   def self.read_file
     storage = CinchStorage.new(@@hangout_filename)
     unless storage.data[:hangouts]
-      storage.data[:hangouts] = Hash.new
+      storage.data[:hangouts] = {}
       storage.save
     end
     storage

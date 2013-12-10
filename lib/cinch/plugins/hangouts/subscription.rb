@@ -1,8 +1,10 @@
+# -*- encoding : utf-8 -*-
+# Class to handle user subscriptions
 class Subscription < Cinch::Plugins::Hangouts
   attr_accessor :nick, :all_links
 
   def to_yaml
-    { }
+    {}
   end
 
   def initialize(nick)
@@ -13,13 +15,13 @@ class Subscription < Cinch::Plugins::Hangouts
 
   def save
     subs = Subscription.storage
-    subs.data[self.nick] = self
+    subs.data[nick] = self
     subs.save
   end
 
   def delete
     subs = Subscription.storage
-    subs.data[self.nick] = nil
+    subs.data[nick] = nil
     subs.save
   end
 
@@ -38,7 +40,8 @@ class Subscription < Cinch::Plugins::Hangouts
       # Don't link the person who linked it.
       if nick != sub.nick
         user = Cinch::User.new(sub.nick, bot)
-        respond(user, "#{nick} just linked a new hangout at: #{Hangout.url(hangout_id)}")
+        respond(user, "#{nick} just linked a new hangout at: " +
+                      "#{Hangout.url(hangout_id)}")
       end
     end
   end
@@ -49,4 +52,3 @@ class Subscription < Cinch::Plugins::Hangouts
     CinchStorage.new(@@subscription_filename)
   end
 end
-

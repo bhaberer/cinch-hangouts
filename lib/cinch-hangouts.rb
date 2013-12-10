@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 require 'cinch/plugins/hangouts'
 require 'cinch/plugins/hangouts/version'
 require 'cinch/plugins/hangouts/hangout'
