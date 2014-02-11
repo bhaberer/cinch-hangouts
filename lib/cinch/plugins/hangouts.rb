@@ -81,12 +81,13 @@ module Cinch::Plugins
 
     def list_hangouts(m)
       Hangout.delete_expired(@expire)
-      hangouts = Hangout.sorted
-      m.user.notice 'No hangouts have been linked recently!' if hangouts.empty?
-
+      if Hangout.sorted.empty?
+        m.user.notice 'No hangouts have been linked recently!'
+        return
+      end
       m.user.notice 'These hangouts have been linked in the last ' +
                     "#{@expire} minutes. They may or may not still be going."
-      hangouts.each do |hangout|
+      Hangout.sorted.each do |hangout|
         m.user.notice "#{hangout.nick} started a hangout at " +
                       Hangout.url(hangout.id) +
                       " it was last linked #{hangout.time.ago.to_words}"
