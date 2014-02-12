@@ -3,10 +3,6 @@
 class Subscription < Cinch::Plugins::Hangouts
   attr_accessor :nick, :all_links
 
-  def to_yaml
-    {}
-  end
-
   def initialize(nick)
     @nick = nick
     @all_links = false
@@ -31,17 +27,17 @@ class Subscription < Cinch::Plugins::Hangouts
   end
 
   def self.list
-    Subscription.storage.data
+    storage.data
   end
 
   def self.notify(hangout_id, bot)
     nick = Hangout.find_by_id(hangout_id).nick
-    Subscription.list.each do |sub|
+    list.each_value do |s|
       # Don't link the person who linked it.
-      if nick != sub.nick
-        user = Cinch::User.new(sub.nick, bot)
-        respond(user, "#{nick} just linked a new hangout at: " +
-                      "#{Hangout.url(hangout_id)}")
+      if nick != s.nick
+        user = Cinch::User.new(s.nick, bot)
+        user.msg("#{nick} just linked a new hangout at: " +
+                    Hangout.url(hangout_id))
       end
     end
   end

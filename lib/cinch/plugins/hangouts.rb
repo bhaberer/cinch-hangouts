@@ -45,11 +45,12 @@ module Cinch::Plugins
     def process_hangout(hangout_id, m)
       if Hangout.find_by_id(hangout_id)
         # If it's an old hangout capture a new expiration time
+        hangout = Hangout.find_by_id(hangout_id)
         hangout.time = Time.now
         hangout.save
       else
-        hangout = Hangout.new(m.user.nick, hangout_id, Time.now)
-        hangout.save
+        Hangout.new(m.user.nick, hangout_id, Time.now)
+          .save
         Subscription.notify(hangout_id, @bot)
       end
     end
@@ -61,7 +62,7 @@ module Cinch::Plugins
       else
         sub = Subscription.new(nick)
         sub.save
-        msg = 'You are now subscribed.' +
+        msg = 'You are now subscribed. ' +
               'I will let you know when a hangout is linked. '
       end
       m.user.notice msg + 'To unsubscribe use `.hangouts unsubscribe`.'
