@@ -10,14 +10,10 @@ class Hangout < Cinch::Plugins::Hangouts
   end
 
   def save
-    storage = CinchStorage.new(@@hangout_filename)
+    storage = Cinch::Storage.new(@@hangout_filename)
     storage.data[:hangouts] ||= {}
     storage.data[:hangouts][id] = self
     storage.save
-  end
-
-  def to_yaml
-    { nick: @nick, id: @id, time: @time }
   end
 
   def self.find_by_id(id)
@@ -52,7 +48,7 @@ class Hangout < Cinch::Plugins::Hangouts
   private
 
   def self.read_file
-    storage = CinchStorage.new(@@hangout_filename)
+    storage = Cinch::Storage.new(@@hangout_filename)
     unless storage.data[:hangouts]
       storage.data[:hangouts] = {}
       storage.save

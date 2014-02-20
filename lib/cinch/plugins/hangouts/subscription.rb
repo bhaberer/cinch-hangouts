@@ -34,10 +34,11 @@ class Subscription < Cinch::Plugins::Hangouts
     nick = Hangout.find_by_id(hangout_id).nick
     list.each_value do |s|
       # Don't link the person who linked it.
-      if nick != s.nick
+      unless nick == s.nick
         user = Cinch::User.new(s.nick, bot)
-        user.msg("#{nick} just linked a new hangout at: " +
-                    Hangout.url(hangout_id))
+        message = "#{nick} just linked a new hangout at: " +
+                  Hangout.url(hangout_id)
+        Hangout.respond(user, message)
       end
     end
   end
@@ -45,6 +46,6 @@ class Subscription < Cinch::Plugins::Hangouts
   private
 
   def self.storage
-    CinchStorage.new(@@subscription_filename)
+    Cinch::Storage.new(@@subscription_filename)
   end
 end

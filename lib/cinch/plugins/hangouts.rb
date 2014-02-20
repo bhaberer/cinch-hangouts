@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'cinch'
-require 'cinch-storage'
+require 'cinch/storage'
 require 'cinch/toolbox'
 require 'time-lord'
 
@@ -95,12 +95,12 @@ module Cinch::Plugins
       end
     end
 
-    def respond(m, message)
+    def respond(user, message)
       case @response_type
       when :notice
-        m.user.notice message
+        user.notice message
       when :pm
-        m.user.send message
+        user.send message
       end
     end
   end

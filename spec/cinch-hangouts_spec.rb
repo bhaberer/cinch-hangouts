@@ -57,6 +57,18 @@ describe Cinch::Plugins::Hangouts do
       reply.should match(/it was last linked \d seconds? ago/)
     end
 
+    it 'should recapture a legit Hangout link' do
+      id = random_hangout_id
+      msg = make_message(@bot, Hangout.url(id, false), { channel: '#foo' })
+      get_replies(msg)
+      sleep 1 # hack until 'time-lord' fix gets released
+      get_replies(msg)
+      sleep 1 # hack until 'time-lord' fix gets released
+      msg = make_message(@bot, '!hangouts')
+      reply = get_replies(msg).length
+        .should == 2
+    end
+
     it 'should capture a new short Hangout link and store it in @storage' do
       msg = make_message(@bot, Hangout.url('7acpjrpcmgl00u0b665mu25b1g', false), { :channel => '#foo' })
       get_replies(msg).should be_empty
@@ -76,9 +88,9 @@ describe Cinch::Plugins::Hangouts do
     end
 
     it 'should allow users to subscribe' do
-      msg = make_message(@bot, '!hangouts subscribe')
-      get_replies(msg).first.text.
-        should include("You are now subscribed")
+      get_replies(make_message(@bot, '!hangouts subscribe'))
+      Cinch::Plugins::Hangouts::Subscription.list.length
+        .should == 1
     end
 
     it 'should inform users that they already subscribed' do
@@ -91,8 +103,8 @@ describe Cinch::Plugins::Hangouts do
     it 'should allow users to unsubscribe' do
       get_replies(make_message(@bot, '!hangouts subscribe'))
       msg = make_message(@bot, '!hangouts unsubscribe')
-      get_replies(msg).first.text.
-        should include("You are now unsubscribed")
+      Cinch::Plugins::Hangouts::Subscription.list.length
+        .should == 0
     end
 
     it 'should inform users that they are not subscribed on an unsubscribe' do
