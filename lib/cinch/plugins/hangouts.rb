@@ -51,7 +51,7 @@ module Cinch::Plugins
       else
         Hangout.new(m.user.nick, hangout_id, Time.now)
           .save
-        Subscription.notify(hangout_id, @bot)
+        Subscription.notify(hangout_id, @bot,  @response_type)
       end
     end
 
@@ -92,15 +92,6 @@ module Cinch::Plugins
         m.user.notice "#{hangout.nick} started a hangout at " +
                       Hangout.url(hangout.id) +
                       " it was last linked #{hangout.time.ago.to_words}"
-      end
-    end
-
-    def respond(user, message)
-      case @response_type
-      when :notice
-        user.notice message
-      when :pm
-        user.send message
       end
     end
   end

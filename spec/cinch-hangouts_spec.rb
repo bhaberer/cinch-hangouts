@@ -102,7 +102,7 @@ describe Cinch::Plugins::Hangouts do
 
     it 'should allow users to unsubscribe' do
       get_replies(make_message(@bot, '!hangouts subscribe'))
-      msg = make_message(@bot, '!hangouts unsubscribe')
+      get_replies(make_message(@bot, '!hangouts unsubscribe'))
       Cinch::Plugins::Hangouts::Subscription.list.length
         .should == 0
     end

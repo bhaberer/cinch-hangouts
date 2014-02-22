@@ -17,7 +17,7 @@ class Subscription < Cinch::Plugins::Hangouts
 
   def delete
     subs = Subscription.storage
-    subs.data[nick] = nil
+    subs.data.delete(nick)
     subs.save
   end
 
@@ -30,7 +30,7 @@ class Subscription < Cinch::Plugins::Hangouts
     storage.data
   end
 
-  def self.notify(hangout_id, bot)
+  def self.notify(hangout_id, bot, type)
     nick = Hangout.find_by_id(hangout_id).nick
     list.each_value do |s|
       # Don't link the person who linked it.
@@ -38,8 +38,17 @@ class Subscription < Cinch::Plugins::Hangouts
         user = Cinch::User.new(s.nick, bot)
         message = "#{nick} just linked a new hangout at: " +
                   Hangout.url(hangout_id)
-        Hangout.respond(user, message)
+        respond(user, message, type)
       end
+    end
+  end
+
+  def self.respond(user, message, type)
+    case type
+    when :notice
+      user.notice message
+    when :pm
+      user.send message
     end
   end
 
