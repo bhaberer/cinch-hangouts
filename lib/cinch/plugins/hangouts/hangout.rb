@@ -41,16 +41,14 @@ class Hangout < Cinch::Plugins::Hangouts
     read_file(files).data[:hangouts]
   end
 
-  def self.url(id, shorten = true)
-    url = "https://plus.google.com/hangouts/_/#{id}"
-    return url unless shorten
-    Cinch::Toolbox.shorten(url)
+  def self.url(id)
+    "https://plus.google.com/hangouts/_/#{id}"
   end
 
   private
 
   def self.read_file(files)
-    fail "No Hangout filename passed" unless files.key?(:hangouts) 
+    fail "No Hangout filename passed" unless files.key?(:hangouts)
     storage = Cinch::Storage.new(files[:hangouts])
     unless storage.data[:hangouts]
       storage.data[:hangouts] = {}

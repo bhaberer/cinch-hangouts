@@ -19,16 +19,16 @@ describe Cinch::Plugins::Hangouts do
 
   describe 'posting a valid hangout link' do
     it 'captures the the link and stores it in @storage' do
-      msg = make_message(@bot, Hangout.url(random_hangout_id, false), { channel: '#foo' })
-      sleep 2
+      msg = make_message(@bot, Hangout.url(random_hangout_id), { channel: '#foo' })
       get_replies(msg)
+      sleep 2
       reply = get_replies(make_message(@bot, '!hangouts')).last.text
       expect(reply).to include('test started a hangout at')
       expect(reply).to match(/it was last linked \d seconds? ago/)
     end
 
     it 'captures even if it has trailing params' do
-      msg = make_message(@bot, Hangout.url(random_hangout_id + '?hl=en', false),
+      msg = make_message(@bot, Hangout.url(random_hangout_id + '?hl=en'),
                                { channel: '#foo' })
       get_replies(msg)
       sleep 2 # hack until 'time-lord' fix gets released
@@ -40,7 +40,7 @@ describe Cinch::Plugins::Hangouts do
 
     it 'recaptures a link' do
       id = random_hangout_id
-      msg = make_message(@bot, Hangout.url(id, false), { channel: '#foo' })
+      msg = make_message(@bot, Hangout.url(id), { channel: '#foo' })
       get_replies(msg)
       sleep 2 # hack until 'time-lord' fix gets released
       get_replies(msg)
@@ -50,7 +50,7 @@ describe Cinch::Plugins::Hangouts do
     end
 
     it 'capture a new short Hangout link and store it in @storage' do
-      msg = make_message(@bot, Hangout.url('7acpjrpcmgl00u0b665mu25b1g', false), { channel: '#foo' })
+      msg = make_message(@bot, Hangout.url('7acpjrpcmgl00u0b665mu25b1g'), { channel: '#foo' })
       expect(get_replies(msg)).to be_empty
       sleep 2 # hack until 'time-lord' fix gets released
       msg = make_message(@bot, '!hangouts')
@@ -58,12 +58,25 @@ describe Cinch::Plugins::Hangouts do
       expect(reply).to include('test started a hangout at')
       expect(reply).to match(/it was last linked \d seconds? ago/)
     end
+
+
+    it 'capture a link and return it' do
+      url = Hangout.url(random_hangout_id)
+      msg = make_message(@bot, url, { channel: '#foo' })
+      expect(get_replies(msg)).to be_empty
+      sleep 2 # hack until 'time-lord' fix gets released
+      msg = make_message(@bot, '!hangouts')
+      reply = get_replies(msg).last.text
+      expect(reply).to include(url)
+      puts reply
+      # expect(reply).to match(/it was last linked \d seconds? ago/)
+    end
   end
 
   describe 'posting an invalid hangout link does not log' do
     it 'when it is malformed (invalid chars)' do
-      msg = make_message(@bot, Hangout.url('82b5cc7f76b7a%19c180416c2f509027!!d8856d',
-                         false), { channel: '#foo' })
+      msg = make_message(@bot, Hangout.url('82b5cc7f76b7a%19c180416c2f509027!!d8856d'),
+                         { channel: '#foo' })
       expect(get_replies(msg)).to be_empty
       msg = make_message(@bot, '!hangouts')
       message = get_replies(msg).first.text
@@ -71,7 +84,7 @@ describe Cinch::Plugins::Hangouts do
     end
 
     it 'when it is malformed (wrong length)' do
-      msg = make_message(@bot, Hangout.url('82b5cc', false), { channel: '#foo' })
+      msg = make_message(@bot, Hangout.url('82b5cc'), { channel: '#foo' })
       expect(get_replies(msg)).to be_empty
       msg = make_message(@bot, '!hangouts')
       expect(get_replies(msg).first.text).to eq('No hangouts have been linked recently!')
@@ -108,18 +121,16 @@ describe Cinch::Plugins::Hangouts do
 
     #it 'should notify users when a new hangout is linked' do
     #  get_replies(make_message(@bot, '!hangouts subscribe'), { channel: '#foo', nick: 'joe' } )
-    #  msgs = get_replies(make_message(@bot, Hangout.url(random_hangout_id, false), { channel: '#foo', nick: 'josh' }))
+    #  msgs = get_replies(make_message(@bot, Hangout.url(random_hangout_id), { channel: '#foo', nick: 'josh' }))
     #  msgs.first.should_not be_nil
     #end
 
     it 'should not notify users when an old hangout is relinked' do
       get_replies(make_message(@bot, '!hangouts subscribe'), { channel: '#foo' } )
-      get_replies(make_message(@bot, Hangout.url(random_hangout_id, false), { channel: '#foo' }))
-      msg = make_message(@bot, Hangout.url(random_hangout_id, false), { channel: '#foo' })
+      get_replies(make_message(@bot, Hangout.url(random_hangout_id), { channel: '#foo' }))
+      msg = make_message(@bot, Hangout.url(random_hangout_id), { channel: '#foo' })
       expect(get_replies(msg)).to be_empty
     end
-
-
   end
 
   def random_hangout_id(len = 27)
