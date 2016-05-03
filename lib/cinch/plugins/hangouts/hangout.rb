@@ -50,7 +50,7 @@ class Hangout < Cinch::Plugins::Hangouts
   private
 
   def self.read_file(files)
-    fail "No Hangout filename passed" unless files.key?(:hangouts)
+    fail "No Hangout filename passed" unless files.key?(:hangouts) 
     storage = Cinch::Storage.new(files[:hangouts])
     unless storage.data[:hangouts]
       storage.data[:hangouts] = {}
