@@ -3,36 +3,38 @@
 class Subscription < Cinch::Plugins::Hangouts
   attr_accessor :nick, :all_links
 
-  def initialize(nick)
+  def initialize(nick, files)
     @nick = nick
     @all_links = false
+    @files = files
     save
   end
 
   def save
-    subs = Subscription.storage
-    subs.data[nick] = self
+    subs = Subscription.storage(@files)
+    subs.data[@nick] = self
     subs.save
   end
 
-  def delete
-    subs = Subscription.storage
-    subs.data.delete(nick)
+  def destroy
+    subs = Subscription.storage(@files)
+    subs.data.delete(@nick)
     subs.save
   end
 
-  def self.for_user(nick)
-    return nil unless list.key?(nick)
-    list[nick]
+  def self.for_user(nick, files)
+    nicks = list(files)
+    return nil unless nicks.key?(nick)
+    Subscription.new(nick[nick], files)
   end
 
-  def self.list
-    storage.data
+  def self.list(files)
+    storage(files).data
   end
 
-  def self.notify(hangout_id, bot, type)
-    nick = Hangout.find_by_id(hangout_id).nick
-    list.each_value do |s|
+  def self.notify(hangout_id, bot, type, files)
+    nick = Hangout.find_by_id(hangout_id, files).nick
+    list(files).each_value do |s|
       # Don't link the person who linked it.
       unless nick == s.nick
         user = Cinch::User.new(s.nick, bot)
@@ -54,7 +56,8 @@ class Subscription < Cinch::Plugins::Hangouts
 
   private
 
-  def self.storage
-    Cinch::Storage.new(@@subscription_filename)
+  def self.storage(files)
+    fail "No Subscription filename passed" unless files.key?(:subscriptions)
+    Cinch::Storage.new(files[:subscriptions])
   end
 end
