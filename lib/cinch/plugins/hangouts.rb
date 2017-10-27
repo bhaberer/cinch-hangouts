@@ -13,7 +13,7 @@ module Cinch::Plugins
 
     # This is the regex that captures hangout links
     # The regex will need to be updated if the url scheme changes in the future
-    HANGOUTS_REGEX = %r((?:_|call)/([a-z0-9]{10,40})(?:\?|$))
+    HANGOUTS_REGEX = %r((?:_|call)/([a-zA-Z0-9_]{10,40})(?:\?|$))
 
     attr_accessor :storage
 

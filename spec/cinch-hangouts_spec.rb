@@ -27,6 +27,16 @@ describe Cinch::Plugins::Hangouts do
       expect(reply).to match(/it was last linked \d seconds? ago/)
     end
 
+    it 'captures the the new link and stores it in @storage' do
+      msg = make_message(@bot, "https://hangouts.google.com/call/KqOHTbdRWNPen5pQJ5zAAAEE",
+                         { channel: '#foo' })
+      get_replies(msg)
+      sleep 2
+      reply = get_replies(make_message(@bot, '!hangouts')).last.text
+      expect(reply).to include('test started a hangout at')
+      expect(reply).to match(/it was last linked \d seconds? ago/)
+    end
+
     it 'captures even if it has trailing params' do
       msg = make_message(@bot, Hangout.url(random_hangout_id + '?hl=en'),
                                { channel: '#foo' })
@@ -134,7 +144,7 @@ describe Cinch::Plugins::Hangouts do
   end
 
   def random_hangout_id(len = 27)
-    chars = ('a'..'z').to_a + ('0'..'9').to_a
+    chars = ('a'..'z').to_a + ('0'..'9').to_a + ('A'..'Z').to_a + ['_']
     string = ''
     len.times { string << chars[rand(chars.length)] }
     string
